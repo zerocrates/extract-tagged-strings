@@ -4,5 +4,5 @@
     "require": {
         "symfony/finder": "^3.0"
     },
-    "bin": ["extract-tragged-strings.php"]
+    "bin": ["extract-tagged-strings.php"]
 }
