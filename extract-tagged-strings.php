@@ -9,7 +9,7 @@ $argv = $_SERVER['argv'];
 if (isset($argv[1])) {
     $dir = $argv[1];
 } else {
-    $dir = __DIR__;
+    $dir = getcwd();
 }
 
 $finder = new Symfony\Component\Finder\Finder;
