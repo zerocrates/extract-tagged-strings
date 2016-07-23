@@ -55,6 +55,24 @@ foreach ($strings as $string => $lineInfo) {
 
     // $string is always a T_CONSTANT_ENCAPSED_STRING so we can safely eval it
     $string = eval("return $string;");
+
+    $pattern = <<<'PATTERN'
+/
+    %
+    ([0-9]*\$)?         # position
+    [+-]?               # sign
+    ([0 ]|\'.)?         # padding
+    -?                  # alignment
+    [0-9]*              # width
+    (\..?[0-9]+)?       # precision
+    [%bcdeEfFgGosuxX]   # type
+/x
+PATTERN;
+
+    if (preg_match($pattern, $string)) {
+        $output .= "#, php-format\n";
+    }
+
     $output .= sprintf($template, addcslashes($string, "\n\"\\"));
 }
 
