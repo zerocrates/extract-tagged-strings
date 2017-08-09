@@ -39,6 +39,17 @@ foreach ($finder as $file) {
     }
 }
 
+$header = <<<'POT'
+#, fuzzy
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+
+POT;
+
 $commentTemplate = "#: %s:%s\n";
 $template = <<<POT
 msgid "%s"
@@ -76,4 +87,4 @@ PATTERN;
     $output .= sprintf($template, addcslashes($string, "\n\"\\"));
 }
 
-echo $output;
+echo $header . $output;
