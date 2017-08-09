@@ -1,6 +1,6 @@
 #!/usr/bin/env php
 <?php
-include 'vendor/autoload.php';
+include __DIR__ . '/../../autoload.php';
 
 $tag = '@translate';
 $excludes = ['vendor', 'modules', 'themes'];
