@@ -2,7 +2,8 @@
     "name": "zerocrates/extract-tagged-strings",
     "description": "Extract comment-tagged strings in gettext format",
     "require": {
-        "symfony/finder": "^3.0"
+        "symfony/finder": "^3.0",
+        "ext-tokenizer": "*"
     },
     "bin": ["extract-tagged-strings.php"],
     "license": "MIT"
