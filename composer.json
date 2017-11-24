@@ -4,5 +4,6 @@
     "require": {
         "symfony/finder": "^3.0"
     },
-    "bin": ["extract-tagged-strings.php"]
+    "bin": ["extract-tagged-strings.php"],
+    "license": "MIT"
 }
