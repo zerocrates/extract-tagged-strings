@@ -31,7 +31,25 @@ foreach ($finder as $file) {
                 $backtrackIndex--;
                 $backtrackToken = $tokens[$backtrackIndex];
                 if (is_array($backtrackToken) && $backtrackToken[0] === T_CONSTANT_ENCAPSED_STRING) {
-                    $strings[$backtrackToken[1]][] = [$file->getRelativePathname(), $backtrackToken[2]];
+                    // $string is always a T_CONSTANT_ENCAPSED_STRING so we can safely eval it.
+                    $string = $backtrackToken[1];
+                    $string = eval("return $string;");
+                    $strings[$string][] = [$file->getRelativePathname(), $backtrackToken[2]];
+                    break;
+                } elseif (is_array($backtrackToken)
+                    && $backtrackToken[0] === T_START_HEREDOC
+                    && isset($tokens[$backtrackIndex + 1])
+                    && is_array($tokens[$backtrackIndex + 1])
+                    && $tokens[$backtrackIndex + 1][0] === T_ENCAPSED_AND_WHITESPACE
+                    && isset($tokens[$backtrackIndex + 2])
+                    && is_array($tokens[$backtrackIndex + 2])
+                    && $tokens[$backtrackIndex + 2][0] === T_END_HEREDOC
+                ) {
+                    $heredocStart = $backtrackToken[1];
+                    $heredocBody = $tokens[$backtrackIndex + 1][1];
+                    $heredocEnd = $tokens[$backtrackIndex + 2][1];
+                    $string = eval("return {$heredocStart}{$heredocBody}{$heredocEnd};");
+                    $strings[$string][] = [$file->getRelativePathname(), $backtrackToken[2]];
                     break;
                 }
             } while ($backtrackIndex > 0);
@@ -63,9 +81,6 @@ foreach ($strings as $string => $lineInfo) {
     foreach ($lineInfo as $occurrence) {
         $output .= sprintf($commentTemplate, $occurrence[0], $occurrence[1]);
     }
-
-    // $string is always a T_CONSTANT_ENCAPSED_STRING so we can safely eval it
-    $string = eval("return $string;");
 
     $pattern = <<<'PATTERN'
 /
