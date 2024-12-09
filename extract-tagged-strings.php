@@ -45,7 +45,9 @@ foreach ($finder as $file) {
                     && $tokens[$backtrackIndex + 2][0] === T_END_HEREDOC
                 ) {
                     $backtrackToken = $tokens[$backtrackIndex + 1];
-                    $string = $backtrackToken[1];
+                    // Don't forget to remove the last end of line, that is
+                    // always present in the heredoc string.
+                    $string = mb_substr($backtrackToken[1], 0, -1);
                     // Indentation of heredoc/nowdoc is managed since PHP 7.3.
                     $heredocEndToken = $tokens[$backtrackIndex + 2][1];
                     $indent = mb_strlen($heredocEndToken) - mb_strlen(ltrim($heredocEndToken));
