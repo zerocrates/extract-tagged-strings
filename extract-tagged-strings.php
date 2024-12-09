@@ -33,9 +33,27 @@ foreach ($finder as $file) {
                 if (is_array($backtrackToken) && $backtrackToken[0] === T_CONSTANT_ENCAPSED_STRING) {
                     $strings[$backtrackToken[1]][] = [$file->getRelativePathname(), $backtrackToken[2]];
                     break;
-                } elseif (is_array($backtrackToken) && $backtrackToken[0] === T_START_HEREDOC && is_array($tokens[$backtrackIndex + 1])) {
+                } elseif (is_array($backtrackToken)
+                    && $backtrackToken[0] === T_START_HEREDOC
+                    && isset($tokens[$backtrackIndex + 1])
+                    && is_array($tokens[$backtrackIndex + 1])
+                    && isset($tokens[$backtrackIndex + 2])
+                    && is_array($tokens[$backtrackIndex + 2])
+                    && $tokens[$backtrackIndex + 2][0] === T_END_HEREDOC
+                ) {
                     $backtrackToken = $tokens[$backtrackIndex + 1];
                     $string = $backtrackToken[1];
+                    // Indentation of heredoc/nowdoc is managed since PHP 7.3.
+                    $heredocEndToken = $tokens[$backtrackIndex + 2][1];
+                    $indent = mb_strlen($heredocEndToken) - mb_strlen(ltrim($heredocEndToken));
+                    if ($indent) {
+                        $string = explode("\n", $string);
+                        foreach ($string as &$str) {
+                            $str = mb_substr($str, $indent);
+                        }
+                        unset($str);
+                        $string = implode("\n", $string);
+                    }
                     // The double quote should not be escaped here, but below.
                     $strings["'" . addcslashes($string, "'\\") . "'"][] = [$file->getRelativePathname(), $backtrackToken[2]];
                     break;
