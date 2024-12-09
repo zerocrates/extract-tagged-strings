@@ -33,6 +33,12 @@ foreach ($finder as $file) {
                 if (is_array($backtrackToken) && $backtrackToken[0] === T_CONSTANT_ENCAPSED_STRING) {
                     $strings[$backtrackToken[1]][] = [$file->getRelativePathname(), $backtrackToken[2]];
                     break;
+                } elseif (is_array($backtrackToken) && $backtrackToken[0] === T_START_HEREDOC && is_array($tokens[$backtrackIndex + 1])) {
+                    $backtrackToken = $tokens[$backtrackIndex + 1];
+                    $string = $backtrackToken[1];
+                    // The double quote should not be escaped here, but below.
+                    $strings["'" . addcslashes($string, "'\\") . "'"][] = [$file->getRelativePathname(), $backtrackToken[2]];
+                    break;
                 }
             } while ($backtrackIndex > 0);
         }
@@ -64,7 +70,8 @@ foreach ($strings as $string => $lineInfo) {
         $output .= sprintf($commentTemplate, $occurrence[0], $occurrence[1]);
     }
 
-    // $string is always a T_CONSTANT_ENCAPSED_STRING so we can safely eval it
+    // $string is always a T_CONSTANT_ENCAPSED_STRING so we can safely eval it.
+    // When $string is a T_START_HEREDOC, it was converted into a string above.
     $string = eval("return $string;");
 
     $pattern = <<<'PATTERN'
