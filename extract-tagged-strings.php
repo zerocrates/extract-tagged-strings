@@ -40,6 +40,7 @@ foreach ($finder as $file) {
                     && $backtrackToken[0] === T_START_HEREDOC
                     && isset($tokens[$backtrackIndex + 1])
                     && is_array($tokens[$backtrackIndex + 1])
+                    && $tokens[$backtrackIndex + 1][0] === T_ENCAPSED_AND_WHITESPACE
                     && isset($tokens[$backtrackIndex + 2])
                     && is_array($tokens[$backtrackIndex + 2])
                     && $tokens[$backtrackIndex + 2][0] === T_END_HEREDOC
