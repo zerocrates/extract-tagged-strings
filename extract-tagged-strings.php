@@ -50,8 +50,10 @@ foreach ($finder as $file) {
                     // always present in the heredoc string.
                     $string = mb_substr($backtrackToken[1], 0, -1);
                     // Indentation of heredoc/nowdoc is managed since PHP 7.3.
+                    // The indent is a number of non-intermixed spaces or tabs.
+                    /** @see https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes */
                     $heredocEndToken = $tokens[$backtrackIndex + 2][1];
-                    $indent = mb_strlen($heredocEndToken) - mb_strlen(ltrim($heredocEndToken));
+                    $indent = strspn($heredocEndToken, ' ') ?: strspn($heredocEndToken, "\t");
                     if ($indent) {
                         $string = explode("\n", $string);
                         foreach ($string as &$str) {
