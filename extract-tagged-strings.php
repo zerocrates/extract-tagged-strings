@@ -23,8 +23,6 @@ $finder->files()->in($dir)
 $strings = [];
 foreach ($finder as $file) {
     $code = $file->getContents();
-    // Find if the file is CRLF or LF.
-    $isCrlfFile = mb_strpos($code, "\r\n") === mb_strpos($code, "\n") - 1;
     $tokens = token_get_all($code);
     foreach ($tokens as $index => $token) {
         if (is_array($token) && $token[0] === T_COMMENT && strpos($token[1], $tag) !== false) {
@@ -47,23 +45,10 @@ foreach ($finder as $file) {
                     && is_array($tokens[$backtrackIndex + 2])
                     && $tokens[$backtrackIndex + 2][0] === T_END_HEREDOC
                 ) {
-                    $backtrackToken = $tokens[$backtrackIndex + 1];
-                    // Don't forget to remove the last end of line, that is
-                    // always present in the heredoc string.
-                    $string = mb_substr($backtrackToken[1], 0, $isCrlfFile ? -2 : -1);
-                    // Indentation of heredoc/nowdoc is managed since PHP 7.3.
-                    // The indent is a number of non-intermixed spaces or tabs.
-                    /** @see https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes */
-                    $heredocEndToken = $tokens[$backtrackIndex + 2][1];
-                    $indent = strspn($heredocEndToken, ' ') ?: strspn($heredocEndToken, "\t");
-                    if ($indent) {
-                        $string = explode("\n", $string);
-                        foreach ($string as &$str) {
-                            $str = mb_substr($str, $indent);
-                        }
-                        unset($str);
-                        $string = implode("\n", $string);
-                    }
+                    $heredocStart = $backtrackToken[1];
+                    $heredocBody = $tokens[$backtrackIndex + 1][1];
+                    $heredocEnd = $tokens[$backtrackIndex + 2][1];
+                    $string = eval("return {$heredocStart}{$heredocBody}{$heredocEnd};");
                     $strings[$string][] = [$file->getRelativePathname(), $backtrackToken[2]];
                     break;
                 }
