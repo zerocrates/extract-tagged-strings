@@ -78,6 +78,10 @@ POT;
 
 $output = '';
 foreach ($strings as $string => $lineInfo) {
+    // Skip empty strings (they'll duplicate the header, and only happen from tagging mistakes in the source)
+    if ($string === '') {
+        continue;
+    }
     foreach ($lineInfo as $occurrence) {
         $output .= sprintf($commentTemplate, $occurrence[0], $occurrence[1]);
     }
